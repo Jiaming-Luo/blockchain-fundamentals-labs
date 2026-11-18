@@ -1,54 +1,55 @@
-# Lab 03 — Counter 智能合约
+# Lab 03 — Counter Smart Contract
 
-本实验使用 Solidity 实现链上计数器，通过 Remix VM 验证累加行为，再由钱包所有者部署到 Sepolia 测试网。
+This lab implements an on-chain counter in Solidity, tests its accumulation behavior in Remix VM, and documents deployment to the Sepolia testnet by the wallet owner.
 
-- `uint256 public count`：保存计数值，部署后默认为 `0`。Solidity 自动生成只读的 `count()`。
-- `add(uint256 x)`：执行 `count += x`。任何地址都能调用；`x` 为 `0` 时值不变，溢出时交易回滚。
-- 编译器：Solidity `0.8.30`。Remix 中关闭优化，EVM Version 保持编译器默认设置。
+- `uint256 private counter`: Stores the counter value, which starts at `0`.
+- `get()`: Returns the current value without modifying state.
+- `add(uint256 x)`: Executes `counter += x`. Any address can call it. Adding `0` leaves the count unchanged; overflow reverts the transaction.
+- Compiler: Solidity `0.8.30`. In Remix, disable optimization and leave the EVM version at the compiler default.
 
-## Remix VM 手动测试
+## Manual Testing in Remix VM
 
-1. 在 [Remix](https://remix.ethereum.org/) 的 File Explorer 中新建 `Counter.sol`，复制本目录的源码。
-2. 在 **Solidity Compiler** 中选择 `0.8.30`，点击 **Compile Counter.sol**。
-3. 在 **Deploy & Run Transactions** 中选择 **Remix VM**，选中 `Counter` 并点击 **Deploy**。
-4. 展开 **Deployed Contracts** 中的新实例，按表操作。每次 `add` 后确认交易成功，再点击 `count`；切换账户后继续使用同一个实例。
+1. In the [Remix](https://remix.ethereum.org/) File Explorer, create `Counter.sol` and paste the source from this directory.
+2. In **Solidity Compiler**, select `0.8.30` and click **Compile Counter.sol**.
+3. In **Deploy & Run Transactions**, select **Remix VM** as the environment, select `Counter`, and click **Deploy**.
+4. Expand the new instance under **Deployed Contracts** and follow the steps below. After each `add` call, confirm that the transaction succeeds, then call `get()`. Keep using the same instance when switching accounts.
 
-| 步骤 | 操作 | `count()` 预期值 | 实测值 |
+| Step | Action | Expected `get()` | Observed `get()` |
 | --- | --- | ---: | --- |
-| 1 | 部署后直接读取 `count()` | 0 | 0 |
-| 2 | 使用部署账户调用 `add(5)` | 5 | 5 |
-| 3 | 切换到另一个 Remix VM 账户，调用 `add(3)` | 8 | 8 |
-| 4 | 调用 `add(0)` | 8 | 8 |
+| 1 | Read `get()` immediately after deployment | 0 | 0 |
+| 2 | Call `add(5)` from Account 1 | 5 | 5 |
+| 3 | Switch to Account 2 and call `add(3)` | 8 | 8 |
+| 4 | Call `add(0)` | 8 | 8 |
 
-## Sepolia 部署
+## Sepolia Deployment
 
-1. 通过 VM 测试后，在 MetaMask 切换到 Sepolia（链 ID `11155111`），确认账户有足够的 Sepolia 测试 ETH 支付 gas。
-2. 在 Remix 的 **Deploy & Run Transactions** 中选择浏览器钱包环境（如 **Injected Provider - MetaMask**）。由钱包所有者确认连接，并核对网络和账户。
-3. 选择 `Counter`，保持 **Value** 为 `0`，点击 **Deploy**。由钱包所有者核对并确认交易，等待链上确认。
-4. 读取新实例的 `count()`（预期 `0`），调用 `add(5)` 并在钱包确认，交易成功后再次读取（预期 `5`）。
-5. 切换到 Account 2，对同一合约调用 `add(3)`，交易成功后读取 `count()`（预期 `8`）。
+1. After the VM tests pass, switch MetaMask to Sepolia (chain ID `11155111`) and ensure the account has enough Sepolia test ETH to pay for gas.
+2. In Remix's **Deploy & Run Transactions** panel, select a browser wallet environment (for example, **Injected Provider - MetaMask**). Have the wallet owner approve the connection and verify the network and account.
+3. Select `Counter`, leave **Value** at `0`, and click **Deploy**. Have the wallet owner review and approve the transaction, then wait for on-chain confirmation.
+4. Read `get()` on the new instance (expected: `0`), call `add(5)`, and confirm it in the wallet. Once the transaction succeeds, read `get()` again (expected: `5`).
+5. Switch to Account 2, call `add(3)` on the same contract, and read `get()` after the transaction succeeds (expected: `8`).
 
-## 作业凭证
+## Deployment Evidence
 
-网络：Sepolia（链 ID `11155111`）。
+Network: Sepolia (chain ID `11155111`).
 
-根据提交者提供的实测记录，Sepolia 部署成功，初始 `count()` 为 `0`；Account 1 调用 `add(5)` 后为 `5`，Account 2 在同一合约上调用 `add(3)` 后为 `8`。`add(0)` 仅在 Remix VM 测试。上述结果来自提交者，未独立核验链上记录。
+In the lab author's manual test, deployment succeeded and `get()` started at `0`. Account 1 called `add(5)`, bringing the count to `5`; Account 2 called `add(3)` on the same contract, bringing it to `8`. `add(0)` was tested only in Remix VM. The Sepolia records were not independently verified on-chain.
 
-| 项目 | 地址或交易 Hash | 浏览器凭证 |
+| Item | Address or Transaction Hash | Explorer Link |
 | --- | --- | --- |
-| 合约地址 | `0x75a9e4dc9100F98c674cfdf60B87281307315A63` | [Etherscan](https://sepolia.etherscan.io/address/0x75a9e4dc9100F98c674cfdf60B87281307315A63) |
-| 部署交易 Hash | `0xcd259b7e83e2002e0002f15303200cd47ac36e3b8915b54591de9725d1cce986` | [Etherscan](https://sepolia.etherscan.io/tx/0xcd259b7e83e2002e0002f15303200cd47ac36e3b8915b54591de9725d1cce986) |
-| `add(5)` 交易 Hash | `0x7831630cd5f42327fb0722760ac437867fe69455b5ed8a1fbfafbea4f0e15f89` | [Etherscan](https://sepolia.etherscan.io/tx/0x7831630cd5f42327fb0722760ac437867fe69455b5ed8a1fbfafbea4f0e15f89) |
-| `add(3)` 交易 Hash | `0x463a1fdd8a56f7d8a97c6bdc9df2710e6ed998cf67267c2bbb14cc1a3967e9e9` | [Etherscan](https://sepolia.etherscan.io/tx/0x463a1fdd8a56f7d8a97c6bdc9df2710e6ed998cf67267c2bbb14cc1a3967e9e9) |
+| Contract address | `0xc1E2ee40d8EF17eE21fe5517A71dE88069F2F55F` | [Etherscan](https://sepolia.etherscan.io/address/0xc1E2ee40d8EF17eE21fe5517A71dE88069F2F55F) |
+| Deployment transaction hash | `0xc62231c6c6cca4f5536bab5bce665e52fe562873c2808d368d0291ec7a813ebf` | [Etherscan](https://sepolia.etherscan.io/tx/0xc62231c6c6cca4f5536bab5bce665e52fe562873c2808d368d0291ec7a813ebf) |
+| `add(5)` transaction hash | `0x78b26aedf7a35016b23534470ea3a526e7940a49589fd5393970c6b21150ed09` | [Etherscan](https://sepolia.etherscan.io/tx/0x78b26aedf7a35016b23534470ea3a526e7940a49589fd5393970c6b21150ed09) |
+| `add(3)` transaction hash | `0x5204e4034545592ed498cdd25525bcb1474fafebd1c045f73c1520ff1e011cbf` | [Etherscan](https://sepolia.etherscan.io/tx/0x5204e4034545592ed498cdd25525bcb1474fafebd1c045f73c1520ff1e011cbf) |
 
-## 截图清单
+## Screenshots
 
-现有截图包括 1 张 Remix VM 截图和 4 张 Sepolia 凭证：
+The evidence includes one Remix VM screenshot and four Sepolia screenshots:
 
-- [Remix VM：本地测试](screenshots/01-remix-vm.png)
-- [Remix：Sepolia 合约的 `count = 8`](screenshots/02-sepolia-count.png)
-- [Etherscan：部署成功](screenshots/03-deployment.png)
-- [Etherscan：第一个账户调用成功](screenshots/04-add5.png)
-- [Etherscan：第二个账户调用同一合约成功](screenshots/05-add3.png)
+- [Remix VM: Local test](screenshots/01-remix-vm.png)
+- [Remix: Sepolia contract with `get() = 8`](screenshots/02-sepolia-count.png)
+- [Etherscan: Successful deployment](screenshots/03-deployment.png)
+- [Etherscan: Successful call from the first account](screenshots/04-add5.png)
+- [Etherscan: Successful call to the same contract from the second account](screenshots/05-add3.png)
 
-三笔交易截图中的 Hash 和合约地址与上表一致。调用截图未展示完整输入数据；参数及中间计数来自实测记录。Remix VM 各步骤的实测结果见测试表。详见[截图索引](screenshots/README.md)。
+The transaction hashes and contract address shown in the screenshots match the table above. The call screenshots do not show the full transaction input; the arguments and intermediate counts are from the manual test record. The Remix VM table lists the observed result for each step. See the [screenshot index](screenshots/README.md) for details.
